@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#define MAX_RECORDS 100
+#define FILE_NAME "data.txt"
+
+typedef struct {
+    char national_id[12];
+    char first_name[50];
+    char last_name[50];
+} Person;
+
+int loadData(Person people[]) {
+    FILE *file = fopen(FILE_NAME, "r");
+    if (file == NULL) {
+        printf("Error: Could not open the file.\n");
+        return -1;
+    }
+
+    int count = 0;
+    while (fscanf(file, "%s %s %s", people[count].national_id, people[count].first_name, people[count].last_name) != EOF) {
+        count++;
+        if (count >= MAX_RECORDS) {
+            break;
+        }
+    }
+
+    fclose(file);
+    return count;
+}
+
+int findPersonByNationalID(Person people[], int count, char *national_id) {
+    for (int i = 0; i < count; i++) {
+        if (strcmp(people[i].national_id, national_id) == 0) {
+            return i;
+        }
+    }
+    return -1; 
+}
+
+int main() {
+    Person people[MAX_RECORDS];
+    int recordCount = loadData(people);
+
+    if (recordCount == -1) {
+        return 1;
+    }
+
+    printf("Loaded %d records from the file.\n", recordCount);
+
+    srand(time(0));
+    int randomIndex = rand() % recordCount;
+    char randomNationalID[12];
+    strcpy(randomNationalID, people[randomIndex].national_id);
+
+    printf("Enter the details for National ID: %s\n", randomNationalID);
+
+    char inputNationalID[12];
+    printf("Please enter the National ID: ");
+    scanf("%s", inputNationalID);
+
+    int personIndex = findPersonByNationalID(people, recordCount, inputNationalID);
+    if (personIndex != -1) {
+        printf("\nDetails for National ID %s:\n", inputNationalID);
+        printf("First Name: %s\n", people[personIndex].first_name);
+        printf("Last Name: %s\n", people[personIndex].last_name);
+    } else {
+        printf("Error: National ID not found.\n");
+    }
+
+    return 0;
+}
